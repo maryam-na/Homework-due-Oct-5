@@ -1,0 +1,33 @@
+from google.cloud import storage
+from google.cloud import bigquery
+
+
+
+def explicit():
+
+    # If you don't specify credentials when constructing the client, the
+    # client library will look for credentials in the environment.
+    # storage_client = storage.Client()
+    # storage_client = storage.Client.from_service_account_json('credentials.json')
+    client=bigquery.Client.from_service_account_json('credentials.json')
+    QUERY = (
+        "SELECT primary_type, description, COUNTIF(year = 2015) AS arrests_2015, "
+        "COUNTIF(year=2016) AS arrests_2016, "
+        "FORMAT('%3.2f', (COUNTIF(year=2016) - COUNTIF(year=2015)) / COUNTIF(year=2015) * 100) AS pct_change_2015_to_2016 "
+        "FROM `bigquery - public - data.chicago_crime.crime` "
+        "WHERE arrest = TRUE AND year IN(2015, 2016) "
+        "GROUP BY primary_type, description HAVING COUNTIF(year=2015) > 100) "
+        "ORDER BY (COUNTIF(year=2016) - COUNTIF(year=2015)) / COUNTIF(year=2015) DESC"
+    )
+    query_job = client.query(QUERY)  # Start Query API Request
+    query_result = query_job.result()  # Get Query Result
+    df = query_result.to_dataframe()  # Save the Query Result to Dataframe
+    test =1
+    print(df)
+
+explicit()
+class Database:
+    def __init__(self):
+       self.movie_list = {}
+    def generate_id(self):
+        return uuid.uuid4()
